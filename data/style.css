@@ -1,0 +1,7 @@
+/* L1-A-StyleSet-2026-03-09 */
+body {
+    background-color: #2e3b23; /* A dark forest green */
+    color: #f0f0f0;            /* Off-white text so it's easy to read */
+    font-family: sans-serif;   /* A clean, modern look for your UI */
+    text-align: center;        /* Centers your text on the screen */
+}
