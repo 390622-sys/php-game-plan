@@ -2,6 +2,8 @@
 // L1-A-SessionMemory-2026-03-10
 // 1. Plug in the Memory Card
 session_start();
+session_destroy();
+
 
 
 
@@ -24,52 +26,86 @@ $supplies = $_SESSION['supplies'];
 $baseHealth = $_SESSION['baseHealth'];
 
 
-// Check if the player sent an action command
-if (isset($_POST['action'])) {
-    $playerChoice = $_POST['action'];
 
-    // If they chose to scavenge...
-    if ($playerChoice == 'scavenge') {
-        $day = $day + 1;           
-        $supplies = $supplies - 1; 
-        $supplies = $supplies + 3; 
+ // Check if the player sent an action command
+ if (isset($_POST['action'])) {
+     $playerChoice = $_POST['action'];
 
-    // L1-A-RestLogic-2026-03-10
-    // If they chose to rest instead...
-    } elseif ($playerChoice == 'rest') {
-        $day = $day + 1;               // A day passes
-        $supplies = $supplies - 1;     // You eat 1 supply
-        $baseHealth = $baseHealth - 5; // The bunker takes 5 damage
-        $health = $health - 10;
+     // If they chose to scavenge...
+     if ($playerChoice == 'scavenge') {
+         $day = $day + 1;           
+         $supplies = $supplies - 1; 
+         $supplies = $supplies + 3; 
 
-    // L1-A-FortifyLogic-2026-03-11
-    // If they chose to fortify instead...
-    } elseif ($playerChoice == 'fortify') {
-        $day = $day + 1;               
-        $supplies = $supplies - 1;     
-        $baseHealth = $baseHealth + 15;  
-    }
+     // L1-A-RestLogic-2026-03-10
+     } elseif ($playerChoice == 'rest') {
+         $day = $day + 1;               
+         $supplies = $supplies - 1;     
+         $baseHealth = $baseHealth - 5; 
 
-    // --- CHECKPOINT 5: END OF DAY RULES ---
+     // L1-A-FortifyLogic-2026-03-11
+     } elseif ($playerChoice == 'fortify') {
+         $day = $day + 1;               
+         $supplies = $supplies - 1;     
+         $baseHealth = $baseHealth + 15;  
 
-    // 1. The Starvation Rule: If supplies drop below 0, take damage!
-    if ($supplies < 0) {
-        $supplies = 0;             // Keep supplies at 0 (no negative food)
-        $health = $health - 5;     // Take 5 damage from starving
-    }
+     // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
+     } elseif ($playerChoice == 'save') {
+         $saveData = [
+             'day' => $day,
+             'health' => $health,
+             'supplies' => $supplies,
+             'baseHealth' => $baseHealth
+         ];
+         $jsonString = json_encode($saveData);
 
-    // 2. The Ruined Base Rule: Prevent base health from going below 0
-    if ($baseHealth < 0) {
-        $baseHealth = 0; 
-    }
+         // Create a unique file for THIS specific player!
+         $playerId = session_id();
+         file_put_contents('data/save_' . $playerId . '.json', $jsonString); 
 
-    // 3. Save ALL stats to the Memory Card!
-    $_SESSION['day'] = $day;
-    $_SESSION['supplies'] = $supplies;
-    $_SESSION['baseHealth'] = $baseHealth;
-    $_SESSION['health'] = $health; 
+     // --- CHECKPOINT 6: MULTIPLAYER LOAD SYSTEM ---
+     } elseif ($playerChoice == 'load') {
+         // Find THIS specific player's file
+         $playerId = session_id();
+         $fileName = 'data/save_' . $playerId . '.json';
 
-} // <-- This final bracket closes the main fence!
+         // Only load if they actually have a save file!
+         if (file_exists($fileName)) {
+             $jsonString = file_get_contents($fileName);
+             $loadData = json_decode($jsonString, true);
+
+             // Update the game stats with the loaded data!
+             $day = $loadData['day'];
+             $health = $loadData['health'];
+             $supplies = $loadData['supplies'];
+             $baseHealth = $loadData['baseHealth'];
+         }
+
+     // --- CHECKPOINT 7: RESTART SYSTEM ---
+     } elseif ($playerChoice == 'restart') {
+         session_destroy(); // Shred the memory card
+         header("Location: index.php"); // Refresh the page to trigger a New Game
+         exit; // Stop running the rest of the code
+     }
+
+     // --- CHECKPOINT 5: END OF DAY RULES ---
+
+     if ($supplies < 0) {
+         $supplies = 0;             
+         $health = $health - 5;     
+     }
+
+     if ($baseHealth < 0) {
+         $baseHealth = 0; 
+     }
+
+     // Save ALL stats to the Memory Card!
+     $_SESSION['day'] = $day;
+     $_SESSION['supplies'] = $supplies;
+     $_SESSION['baseHealth'] = $baseHealth;
+     $_SESSION['health'] = $health; 
+
+ } // <-- This final bracket closes the main fence!
 ?>
 <!DOCTYPE html>
 <html>
@@ -105,6 +141,7 @@ if (isset($_POST['action'])) {
             <button type="submit" name="action" value="fortify">Fortify Base</button>
             <br><br> <button type="submit" name="action" value="save">💾 Save Game</button>
             <button type="submit" name="action" value="load">📂 Load Game</button>
+            <button type="submit" name="action" value="restart">🔄 Restart Game</button>
         </form>
 
     <?php } ?>
