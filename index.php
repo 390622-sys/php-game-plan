@@ -2,7 +2,8 @@
 // L1-A-SessionMemory-2026-03-10
 // 1. Plug in the Memory Card
 session_start();
-session_destroy();
+
+
 
 
 
@@ -19,24 +20,43 @@ if (!isset($_SESSION['day'])) {
     $_SESSION['baseHealth'] = 100; // Your bunker starts at 100%
 }
 
+
 // 3. Load the stats from the Memory Card
 $day = $_SESSION['day'];
 $health = $_SESSION['health'];
 $supplies = $_SESSION['supplies'];
 $baseHealth = $_SESSION['baseHealth'];
 
-
+// Create an empty message string
+$eventMessage = "";
 
  // Check if the player sent an action command
  if (isset($_POST['action'])) {
      $playerChoice = $_POST['action'];
 
      // If they chose to scavenge...
-     if ($playerChoice == 'scavenge') {
-         $day = $day + 1;           
-         $supplies = $supplies - 1; 
-         $supplies = $supplies + 3; 
+      if ($playerChoice == 'scavenge') {
+          $day = $day + 1;           
+          $supplies = $supplies - 1; 
+          $supplies = $supplies + 3; 
 
+          // --- CHECKPOINT 7: RANDOM MINI-EVENTS ---
+           $diceRoll = rand(1, 10); // Roll a 10-sided dice!
+
+           // Triple the danger! If it rolls 1, 2, or 3 (30% chance)
+           if ($diceRoll <= 3) {
+               $health = $health - 15; 
+               $eventMessage = "⚠️ You were attacked by a wild animal! Lost 15 Health.";
+
+           // Keep the stash exactly the same (10% chance)
+           } elseif ($diceRoll == 10) {
+               $supplies = $supplies + 5; 
+               $eventMessage = "🎒 Jackpot! You found a hidden stash! Gained 5 extra Supplies.";
+
+           // Normal scavenge (rolls 4 through 9)
+           } else {
+               $eventMessage = "🌲 You scavenged safely and found some supplies.";
+           }
      // L1-A-RestLogic-2026-03-10
      } elseif ($playerChoice == 'rest') {
          $day = $day + 1;               
@@ -48,6 +68,31 @@ $baseHealth = $_SESSION['baseHealth'];
          $day = $day + 1;               
          $supplies = $supplies - 1;     
          $baseHealth = $baseHealth + 15;  
+
+
+
+         // L1-A-FortifyLogic-2026-03-11
+         } elseif ($playerChoice == 'fortify') {
+             $day = $day + 1;               
+             $supplies = $supplies - 1;     
+             $baseHealth = $baseHealth + 15;  
+
+         // --- CHECKPOINT 7: HEALTH SYSTEM (HEAL) ---
+         } elseif ($playerChoice == 'heal') {
+
+             // The Bouncer: Only allow healing if they have 2 or more supplies!
+             if ($supplies >= 2) {
+                 $day = $day + 1;               // Healing takes 1 full day
+                 $supplies = $supplies - 2;     // It takes 2 supplies to make bandages
+                 $health = $health + 5;        // Restore 5 Health!
+
+                 // Safety Check: Don't let health go over 100%
+                 if ($health > 100) {
+                     $health = 100;
+                 }
+             }
+
+         // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
 
      // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
      } elseif ($playerChoice == 'save') {
@@ -116,6 +161,12 @@ $baseHealth = $_SESSION['baseHealth'];
 <body>
     <h1>Bunker Survival</h1>
 
+     <?php if ($eventMessage != "") { ?>
+         <p style="background-color: #333; color: orange; padding: 10px; border-radius: 5px;">
+             <strong><?php echo $eventMessage; ?></strong>
+         </p>
+     <?php } ?>
+
     <div class="stats">
         <p><strong>Day:</strong> <?php echo $day; ?> / 30</p>
         <p><strong>Health:</strong> <?php echo $health; ?>%</p>
@@ -139,6 +190,8 @@ $baseHealth = $_SESSION['baseHealth'];
             <button type="submit" name="action" value="scavenge">Scavenge for Supplies</button>
             <button type="submit" name="action" value="rest">Rest in Bunker</button>
             <button type="submit" name="action" value="fortify">Fortify Base</button>
+            <button type="submit" name="action" value="heal">🩹 Heal Wounds</button>
+            <br><br>
             <br><br> <button type="submit" name="action" value="save">💾 Save Game</button>
             <button type="submit" name="action" value="load">📂 Load Game</button>
             <button type="submit" name="action" value="restart">🔄 Restart Game</button>
