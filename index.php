@@ -11,21 +11,25 @@ session_start();
 
 
 
+
+
 // 2. If it is a New Game, set the starting stats
 if (!isset($_SESSION['day'])) {
     $_SESSION['day'] = 1;
     $_SESSION['health'] = 100;
     $_SESSION['supplies'] = 10;
-    // L1-A-BaseHealthInit-2026-03-10
-    $_SESSION['baseHealth'] = 100; // Your bunker starts at 100%
+    $_SESSION['baseHealth'] = 100; 
+    $_SESSION['baseLevel'] = 1; // <-- NEW: Start at Level 1
 }
-
 
 // 3. Load the stats from the Memory Card
 $day = $_SESSION['day'];
 $health = $_SESSION['health'];
 $supplies = $_SESSION['supplies'];
 $baseHealth = $_SESSION['baseHealth'];
+$baseLevel = $_SESSION['baseLevel']; // <-- NEW: Load the level
+
+$isRescued = false; // Everyone starts out stuck in the forest!
 
 // Create an empty message string
 $eventMessage = "";
@@ -61,7 +65,7 @@ $eventMessage = "";
      } elseif ($playerChoice == 'rest') {
          $day = $day + 1;               
          $supplies = $supplies - 1;     
-         $baseHealth = $baseHealth - 5; 
+         $baseHealth = $baseHealth - 10; 
 
      // L1-A-FortifyLogic-2026-03-11
      } elseif ($playerChoice == 'fortify') {
@@ -92,7 +96,35 @@ $eventMessage = "";
                  }
              }
 
-         // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
+          // --- CHECKPOINT 8: BASE UPGRADES ---
+          } elseif ($playerChoice == 'upgrade') {
+
+              // The Bouncer: Do they have enough supplies?
+              if ($supplies >= 10) {
+                  $day = $day + 1;               // Takes a full day of hard work
+                  $supplies = $supplies - 10;    // Costs 10 supplies!
+                  $baseLevel = $baseLevel + 1;   // Level up!
+                  $baseHealth = $baseHealth + 50; // Huge bonus to base health
+
+                  $eventMessage = "🛠️ SUCCESS! You upgraded your bunker to Level " . $baseLevel . "!";
+              } else {
+                  // If they don't have 10 supplies, reject them!
+                  $eventMessage = "❌ Not enough materials! You need 10 supplies to upgrade.";
+
+              }
+
+
+          // --- CHECKPOINT 8: CHOPPER RESCUE ---
+          } elseif ($playerChoice == 'rescue') {
+
+              // The Bouncer: Do they have 5 supplies for the flare?
+              if ($supplies >= 5) {
+                  $isRescued = true; // Trigger the Win State!
+              } else {
+                  $eventMessage = "❌ You need 5 supplies to build a signal flare! Keep scavenging!";
+              }
+
+          // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
 
      // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
      } elseif ($playerChoice == 'save') {
@@ -149,6 +181,7 @@ $eventMessage = "";
      $_SESSION['supplies'] = $supplies;
      $_SESSION['baseHealth'] = $baseHealth;
      $_SESSION['health'] = $health; 
+     $_SESSION['baseLevel'] = $baseLevel; // <-- NEW: Save the level
 
  } // <-- This final bracket closes the main fence!
 ?>
@@ -172,6 +205,7 @@ $eventMessage = "";
         <p><strong>Health:</strong> <?php echo $health; ?>%</p>
         <p><strong>Supplies:</strong> <?php echo $supplies; ?> units</p>
         <p><strong>Base Health:</strong> <?php echo $baseHealth; ?>%</p>
+        <p><strong>Base Level:</strong> <?php echo $baseLevel; ?></p>
     </div>
 
     <?php if ($health <= 0) { ?>
@@ -179,7 +213,7 @@ $eventMessage = "";
         <h2 style="color: red;">GAME OVER</h2>
         <p>You succumbed to the wilderness. You survived for <?php echo $day; ?> days.</p>
 
-    <?php } elseif ($day >= 30) { ?>
+    <?php } elseif ($isRescued == true) { ?>
 
         <h2 style="color: green;">VICTORY!</h2>
         <p>The rescue chopper has arrived! You survived the full 30 days.</p>
@@ -191,7 +225,10 @@ $eventMessage = "";
             <button type="submit" name="action" value="rest">Rest in Bunker</button>
             <button type="submit" name="action" value="fortify">Fortify Base</button>
             <button type="submit" name="action" value="heal">🩹 Heal Wounds</button>
-            <br><br>
+            <button type="submit" name="action" value="upgrade">🛠️ Upgrade Base (Cost: 10)</button>
+            <?php if ($day >= 30) { ?>
+                <button type="submit" name="action" value="rescue" style="background-color: green; color: white;">🚁 Signal Chopper (Cost: 5 Supplies)</button>
+            <?php } ?>
             <br><br> <button type="submit" name="action" value="save">💾 Save Game</button>
             <button type="submit" name="action" value="load">📂 Load Game</button>
             <button type="submit" name="action" value="restart">🔄 Restart Game</button>
