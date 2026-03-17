@@ -126,19 +126,26 @@ $eventMessage = "";
 
           // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
 
-     // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
-     } elseif ($playerChoice == 'save') {
-         $saveData = [
-             'day' => $day,
-             'health' => $health,
-             'supplies' => $supplies,
-             'baseHealth' => $baseHealth
-         ];
-         $jsonString = json_encode($saveData);
+          // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
+           } elseif ($playerChoice == 'save') {
+               // Grab the typed name, or default to "Unknown Survivor"
+               $playerName = !empty($_POST['playerName']) ? $_POST['playerName'] : "Unknown Survivor";
 
-         // Create a unique file for THIS specific player!
-         $playerId = session_id();
-         file_put_contents('data/save_' . $playerId . '.json', $jsonString); 
+               $saveData = [
+                   'name' => $playerName, // <-- NEW: Save the player's name!
+                   'day' => $day,
+                   'health' => $health,
+                   'supplies' => $supplies,
+                   'baseHealth' => $baseHealth,
+                   'baseLevel' => $baseLevel 
+               ];
+               $jsonString = json_encode($saveData);
+
+               // Create a unique file for THIS specific player!
+               $playerId = session_id();
+               file_put_contents('data/save_' . $playerId . '.json', $jsonString); 
+
+               $eventMessage = "💾 Game Saved for " . $playerName . "!";
 
      // --- CHECKPOINT 6: MULTIPLAYER LOAD SYSTEM ---
      } elseif ($playerChoice == 'load') {
@@ -229,9 +236,14 @@ $eventMessage = "";
             <?php if ($day >= 30) { ?>
                 <button type="submit" name="action" value="rescue" style="background-color: green; color: white;">🚁 Signal Chopper (Cost: 5 Supplies)</button>
             <?php } ?>
-            <br><br> <button type="submit" name="action" value="save">💾 Save Game</button>
-            <button type="submit" name="action" value="load">📂 Load Game</button>
-            <button type="submit" name="action" value="restart">🔄 Restart Game</button>
+           <br><br> 
+           <input type="text" name="playerName" placeholder="Enter your name...">
+           <button type="submit" name="action" value="save">💾 Save Game</button>
+           <button type="submit" name="action" value="load">📂 Load Game</button>
+           <button type="submit" name="action" value="restart">🔄 Restart Game</button>
+
+           <br><br>
+           <a href="leaderboard.php" style="color: yellow;">🏆 View Leaderboard</a>
         </form>
 
     <?php } ?>
