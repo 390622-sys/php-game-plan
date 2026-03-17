@@ -33,6 +33,8 @@ $isRescued = false; // Everyone starts out stuck in the forest!
 
 // Create an empty message string
 $eventMessage = "";
+$visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
+
 
  // Check if the player sent an action command
  if (isset($_POST['action'])) {
@@ -51,6 +53,7 @@ $eventMessage = "";
            if ($diceRoll <= 3) {
                $health = $health - 15; 
                $eventMessage = "⚠️ You were attacked by a wild animal! Lost 15 Health.";
+               $visualEffect = "shake"; // <-- NEW: Trigger the earthquake!
 
            // Keep the stash exactly the same (10% chance)
            } elseif ($diceRoll == 10) {
@@ -89,6 +92,9 @@ $eventMessage = "";
                  $day = $day + 1;               // Healing takes 1 full day
                  $supplies = $supplies - 2;     // It takes 2 supplies to make bandages
                  $health = $health + 5;        // Restore 5 Health!
+
+
+                 $visualEffect = "glow"; // <-- NEW: Trigger the green flash!
 
                  // Safety Check: Don't let health go over 100%
                  if ($health > 100) {
@@ -198,7 +204,7 @@ $eventMessage = "";
         <title>Forest Survival</title>
         <link rel="stylesheet" href="data/style.css">
     </head>
-<body>
+     <body class="<?php echo $visualEffect; ?>">
     <h1>Bunker Survival</h1>
 
      <?php if ($eventMessage != "") { ?>
