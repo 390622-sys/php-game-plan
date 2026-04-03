@@ -1,18 +1,114 @@
-/* L1-A-StyleSet-2026-03-09 */
-body {
-    background-color: #2e3b23; /* A dark forest green */
-    color: #f0f0f0;            /* Off-white text so it's easy to read */
-    font-family: sans-serif;   /* A clean, modern look for your UI */
-    text-align: center;        /* Centers your text on the screen */
+/* =========================================
+   BUNKER SURVIVAL - MASTER STYLESHEET
+========================================= */
 
-    /* NEW: Stretch to the bottom of the screen! */
+/* --- GLOBAL THEME --- */
+body {
+    background-color: #121411; /* Very dark, gritty bunker color */
+    background-image: radial-gradient(circle, #2e3b23 0%, #121411 100%);
+    background-attachment: fixed;
+    color: #e0e0e0;
+    font-family: 'Courier New', Courier, monospace; /* Gritty terminal vibe */
+    text-align: center;
     min-height: 100vh;
     margin: 0;
+    padding-top: 30px;
+}
+
+h1 {
+    font-size: 3em;
+    color: #8fa876;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+}
+
+/* --- THE GAME DASHBOARD --- */
+.stats {
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid #4a5c39;
+    border-radius: 10px;
+    padding: 15px;
+    max-width: 700px;
+    margin: 20px auto;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.05); 
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.stats p {
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #1a2415;
+    border: 1px solid #3a4c29;
+    border-radius: 5px;
+    min-width: 140px;
+    font-size: 1.1em;
+}
+
+/* --- BUTTONS --- */
+form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+button {
+    background-color: #2e3b23;
+    color: #fff;
+    border: 2px solid #5a7c39;
+    padding: 12px 20px;
+    margin: 8px;
+    font-size: 1.1em;
+    font-family: inherit;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease; /* Makes the hover effect smooth! */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+
+/* When the mouse hovers over a button... */
+button:hover {
+    background-color: #4a5c39;
+    transform: translateY(-3px); /* Button lifts up slightly */
+    box-shadow: 2px 5px 10px rgba(0,255,0,0.2); /* Glows green */
+}
+
+/* When the button is clicked... */
+button:active {
+    transform: translateY(1px); /* Button presses down */
+}
+
+/* --- TEXT INPUTS (For Saving) --- */
+input[type="text"] {
+    padding: 12px;
+    background-color: #111;
+    color: #00ff00;
+    border: 1px solid #4a5c39;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 1.1em;
+    width: 250px;
+}
+
+/* --- LINKS --- */
+a {
+    display: inline-block;
+    margin: 10px 15px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+    font-size: 1.2em;
+}
+
+a:hover {
+    text-shadow: 0 0 10px currentColor; /* Makes links glow when hovered */
 }
 
 
-
-/* --- CHECKPOINT 10: VISUAL EFFECTS --- */
+/* =========================================
+   CHECKPOINT 10: VISUAL EFFECTS 
+========================================= */
 
 /* The Green Healing Flash */
 .glow {
