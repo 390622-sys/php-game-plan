@@ -248,9 +248,10 @@ $visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
            <button type="submit" name="action" value="load">📂 Load Game</button>
            <button type="submit" name="action" value="restart">🔄 Restart Game</button>
 
-           <br><br>
-           <a href="leaderboard.php" style="color: yellow;">🏆 View Leaderboard</a>
         </form>
+     <br><br>
+     <a href="leaderboard.php" style="color: yellow;">🏆 View Leaderboard</a> | 
+     <a href="about.php" style="color: lightblue;">📖 About the Game</a>
 
     <?php } ?>
 
