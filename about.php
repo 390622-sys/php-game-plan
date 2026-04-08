@@ -1,55 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>About - Bunker Survival</title>
+    <title>Bunker Survival - About</title>
     <link rel="stylesheet" href="data/style.css">
     <style>
-        /* A little extra CSS just for this page to make reading easier */
-        .about-container { 
-            width: 80%; 
-            max-width: 800px;
-            margin: 20px auto; 
-            background-color: #222; 
-            padding: 20px 40px; 
-            border-radius: 10px; 
-            text-align: left; 
-            border: 2px solid #555;
+        .guide-section {
+            background-color: #222;
+            border: 1px solid #444;
+            padding: 20px;
+            margin: 15px auto;
+            width: 80%;
+            max-width: 600px;
+            text-align: left;
+            border-radius: 8px;
         }
-        h2 { color: orange; border-bottom: 1px solid #555; padding-bottom: 5px; }
-        ul { line-height: 1.6; }
-        li { margin-bottom: 10px; }
+        .guide-section h3 {
+            color: lightgreen;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        .guide-section ul {
+            list-style-type: square;
+            color: #ddd;
+            padding-left: 20px;
+        }
+        .guide-section li {
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .highlight {
+            color: orange;
+            font-weight: bold;
+        }
+        .danger {
+            color: #ff4c4c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+    <h1>📖 Survivor's Field Guide</h1>
+    <p>The forest is unforgiving. Read this manual carefully if you want to make it out alive.</p>
 
-    <h1>About Bunker Survival</h1>
+    <div class="guide-section">
+        <h3>🎯 The Goal</h3>
+        <p>You are stranded in a hostile wilderness. You must survive for <span class="highlight">30 Days</span>. Once Day 30 arrives, the rescue chopper will be in range. However, building the massive signal fire to get their attention will cost you <span class="highlight">20 Supplies</span>. Start stockpiling early!</p>
+    </div>
 
-    <div class="about-container">
-        <h2>📜 How to Play (Rules)</h2>
+    <div class="guide-section">
+        <h3>📊 Vital Stats</h3>
         <ul>
-            <li><strong>The Goal:</strong> Survive for 30 days in the harsh wilderness until the rescue chopper arrives.</li>
-            <li><strong>Scavenging:</strong> Heading out to scavenge is the only way to find supplies, but it's dangerous! You might find a hidden stash, or you might get attacked by wild animals.</li>
-            <li><strong>Health & Starvation:</strong> You need to eat every day. If you run out of supplies, you will starve and take damage. If your Health hits 0%, it's Game Over.</li>
-            <li><strong>Base Upgrades:</strong> Stockpile 10 supplies to permanently upgrade your Bunker's level and increase its maximum health!</li>
-            <li><strong>Winning the Game:</strong> Reaching Day 30 isn't enough. You must have at least 5 supplies saved up to build a flare and signal the chopper for rescue!</li>
-        </ul>
-
-        <h2>🧑‍💻 Credits</h2>
-        <p><strong>Lead Developer & Game Designer:</strong> You! (Put your actual name here for your project submission!)</p>
-        <p><strong>Assistant Programmer:</strong> Google Gemini (AI)</p>
-
-        <h2>🤖 AI Documentation</h2>
-        <p>Artificial Intelligence (Gemini) was utilized as a coding co-pilot during the development of this project. Specific uses include:</p>
-        <ul>
-            <li>Brainstorming and refining game mechanics (Economy balance, Win states, RNG events).</li>
-            <li>Writing and structuring PHP logic for the game loop, bouncer checks, and session-based memory.</li>
-            <li>Developing the JSON file reading/writing system for the Multiplayer Save and Leaderboard features.</li>
-            <li>Debugging syntax errors and CSS layout issues.</li>
+            <li><strong>Health:</strong> Keep this above 0%. If you run out of supplies at the end of the day, you will <span class="danger">starve and lose 20 Health</span>.</li>
+            <li><strong>Supplies:</strong> The currency of survival. You consume 1 supply every single day. You also use them to heal, upgrade, and signal the chopper.</li>
+            <li><strong>Base Health:</strong> Your bunker's integrity. <span class="danger">It naturally decays by 5 every single day</span> from the harsh elements. Protect your walls!</li>
+            <li><strong>Base Level:</strong> Upgrading your base increases its level and grants a massive boost to Base Health.</li>
         </ul>
     </div>
 
-    <br>
-    <a href="index.php" style="color: lightblue; font-size: 1.2em;">⬅️ Return to Bunker</a>
+    <div class="guide-section">
+        <h3>⚙️ Daily Actions</h3>
+        <ul>
+            <li><strong>Scavenge for Supplies:</strong> Search the forest. Usually yields 3 supplies, but beware: there is a 30% chance a wild animal attacks you <span class="danger">(-15 Health AND -10 Base Health)</span>. There is also a 10% chance to find a hidden stash!</li>
+            <li><strong>Rest in Bunker:</strong> Stay inside. Saves your personal health, but your base takes an extra 10 damage from neglect.</li>
+            <li><strong>Fortify Base:</strong> Spend a day repairing your bunker to restore 15 Base Health.</li>
+            <li><strong>Heal Wounds:</strong> Spend <span class="highlight">5 Supplies</span> to craft bandages and restore 5 Health.</li>
+            <li><strong>Upgrade Base:</strong> Spend <span class="highlight">10 Supplies</span> to heavily reinforce your bunker and gain 50 Base Health.</li>
+        </ul>
+    </div>
+
+    <br><br>
+    <a href="index.php" style="font-size: 1.2em; color: lightblue; text-decoration: none; border: 1px solid lightblue; padding: 10px 20px; border-radius: 5px;">⬅️ Return to the Bunker</a>
     <br><br>
 
 </body>

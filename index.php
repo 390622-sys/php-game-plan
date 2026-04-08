@@ -17,7 +17,7 @@ session_start();
 if (!isset($_SESSION['day'])) {
     $_SESSION['day'] = 1;
     $_SESSION['health'] = 100;
-    $_SESSION['supplies'] = 10;
+    $_SESSION['supplies'] = 5;
     $_SESSION['baseHealth'] = 100; 
     $_SESSION['baseLevel'] = 1; // <-- NEW: Start at Level 1
 }
@@ -49,11 +49,14 @@ $visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
           // --- CHECKPOINT 7: RANDOM MINI-EVENTS ---
            $diceRoll = rand(1, 10); // Roll a 10-sided dice!
 
-           // Triple the danger! If it rolls 1, 2, or 3 (30% chance)
-           if ($diceRoll <= 3) {
-               $health = $health - 15; 
-               $eventMessage = "⚠️ You were attacked by a wild animal! Lost 15 Health.";
-               $visualEffect = "shake"; // <-- NEW: Trigger the earthquake!
+          // Triple the danger! If it rolls 1, 2, or 3 (30% chance)
+             if ($diceRoll <= 3) {
+                 $health = $health - 15; 
+                 $baseHealth = $baseHealth - 10; // <-- NEW: The animal damages the base too!
+
+                 // Update the message so the player knows they lost both!
+                 $eventMessage = "⚠️ A wild animal attacked you and damaged the bunker! Lost 15 Health and 10 Base Health.";
+                 $visualEffect = "shake"; // Trigger the earthquake!
 
            // Keep the stash exactly the same (10% chance)
            } elseif ($diceRoll == 10) {
@@ -84,23 +87,31 @@ $visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
              $supplies = $supplies - 1;     
              $baseHealth = $baseHealth + 15;  
 
-         // --- CHECKPOINT 7: HEALTH SYSTEM (HEAL) ---
-         } elseif ($playerChoice == 'heal') {
+          // --- CHECKPOINT 7: HEALTH SYSTEM (HEAL) ---
+           } elseif ($playerChoice == 'heal') {
 
-             // The Bouncer: Only allow healing if they have 2 or more supplies!
-             if ($supplies >= 2) {
-                 $day = $day + 1;               // Healing takes 1 full day
-                 $supplies = $supplies - 2;     // It takes 2 supplies to make bandages
-                 $health = $health + 5;        // Restore 5 Health!
+               // Bouncer Check 1: Are they already at full health?
+               if ($health >= 100) {
+                   $eventMessage = "❌ You are already at full health! Don't waste supplies.";
+               }
+               // Bouncer Check 2: Do they have 5 or more supplies?
+               elseif ($supplies >= 5) {
+                   $day = $day + 1;               // Healing takes 1 full day
+                   $supplies = $supplies - 5;     // <-- CHANGED: Now correctly costs 5 supplies
+                   $health = $health + 5;         // Restore 5 Health!
 
+                   $visualEffect = "glow";        // Trigger the green flash!
+                   $eventMessage = "🩹 You bandaged your wounds. (+5 Health)";
 
-                 $visualEffect = "glow"; // <-- NEW: Trigger the green flash!
-
-                 // Safety Check: Don't let health go over 100%
-                 if ($health > 100) {
-                     $health = 100;
-                 }
-             }
+                   // Safety Check: Don't let health go over 100%
+                   if ($health > 100) {
+                       $health = 100;
+                   }
+               } 
+               // If they are hurt but don't have enough supplies:
+               else {
+                   $eventMessage = "❌ You need 5 supplies to heal!";
+               }
 
           // --- CHECKPOINT 8: BASE UPGRADES ---
           } elseif ($playerChoice == 'upgrade') {
@@ -119,16 +130,15 @@ $visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
 
               }
 
-
           // --- CHECKPOINT 8: CHOPPER RESCUE ---
-          } elseif ($playerChoice == 'rescue') {
+           } elseif ($playerChoice == 'rescue') {
 
-              // The Bouncer: Do they have 5 supplies for the flare?
-              if ($supplies >= 5) {
-                  $isRescued = true; // Trigger the Win State!
-              } else {
-                  $eventMessage = "❌ You need 5 supplies to build a signal flare! Keep scavenging!";
-              }
+               // The Bouncer: Now requires 20 supplies!
+               if ($supplies >= 20) {
+                   $isRescued = true; // Trigger the Win State!
+               } else {
+                   $eventMessage = "❌ You need 20 supplies to build a massive signal fire! Keep scavenging!";
+               }
 
           // --- CHECKPOINT 6: MULTIPLAYER SAVE SYSTEM ---
 
@@ -180,14 +190,22 @@ $visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
 
      // --- CHECKPOINT 5: END OF DAY RULES ---
 
-     if ($supplies < 0) {
-         $supplies = 0;             
-         $health = $health - 5;     
-     }
+      if ($supplies <= 0) {
+          $supplies = 0;             
+          $health = $health - 20;     // <-- CHANGED: Starvation hurts way more!
+          $eventMessage = "💀 You are out of food! Starving caused you to lose 20 Health.";
+      }
 
-     if ($baseHealth < 0) {
-         $baseHealth = 0; 
-     }
+
+     if ($baseHealth <= 0) {
+          $baseHealth = 0; 
+          // Optional bonus cruelty: If base health is 0, they take extra damage!
+          $health = $health - 10;
+          $eventMessage = "🏚️ Your bunker is ruined! You are exposed to the elements. (-10 Health)";
+      }
+
+      // NEW: The bunker takes 5 damage every single day!
+      $baseHealth = $baseHealth - 5;
 
      // Save ALL stats to the Memory Card!
      $_SESSION['day'] = $day;
@@ -221,40 +239,52 @@ $visualEffect = ""; // <-- NEW: Starts empty so the screen is normal
         <p><strong>Base Level:</strong> <?php echo $baseLevel; ?></p>
     </div>
 
-    <?php if ($health <= 0) { ?>
+         <?php if ($health <= 0) { ?>
 
-        <h2 style="color: red;">GAME OVER</h2>
-        <p>You succumbed to the wilderness. You survived for <?php echo $day; ?> days.</p>
+                 <h2 style="color: red;">GAME OVER</h2>
+                 <p>You succumbed to the wilderness. You survived for <?php echo $day; ?> days.</p>
 
-    <?php } elseif ($isRescued == true) { ?>
+                 <form method="POST">
+                     <button type="submit" name="action" value="restart" style="background-color: darkred; color: white;">💀 Try Again (Restart)</button>
+                 </form>
 
-        <h2 style="color: green;">VICTORY!</h2>
-        <p>The rescue chopper has arrived! You survived the full 30 days.</p>
+             <?php } elseif ($isRescued == true) { ?>
 
-    <?php } else { ?>
+                 <h2 style="color: green;">VICTORY!</h2>
+                 <p>The rescue chopper has arrived! You survived the full 30 days.</p>
 
-        <form method="POST">
-            <button type="submit" name="action" value="scavenge">Scavenge for Supplies</button>
-            <button type="submit" name="action" value="rest">Rest in Bunker</button>
-            <button type="submit" name="action" value="fortify">Fortify Base</button>
-            <button type="submit" name="action" value="heal">🩹 Heal Wounds</button>
-            <button type="submit" name="action" value="upgrade">🛠️ Upgrade Base (Cost: 10)</button>
-            <?php if ($day >= 30) { ?>
-                <button type="submit" name="action" value="rescue" style="background-color: green; color: white;">🚁 Signal Chopper (Cost: 5 Supplies)</button>
-            <?php } ?>
-           <br><br> 
-           <input type="text" name="playerName" placeholder="Enter your name...">
-           <button type="submit" name="action" value="save">💾 Save Game</button>
-           <button type="submit" name="action" value="load">📂 Load Game</button>
-           <button type="submit" name="action" value="restart">🔄 Restart Game</button>
+                 <form method="POST">
+                     <input type="text" name="playerName" placeholder="Enter your name...">
+                     <button type="submit" name="action" value="save">💾 Save Winning Score</button>
+                     <button type="submit" name="action" value="restart">🔄 Play Again</button>
+                 </form>
 
-        </form>
-     <br><br>
-     <a href="leaderboard.php" style="color: yellow;">🏆 View Leaderboard</a> | 
-     <a href="about.php" style="color: lightblue;">📖 About the Game</a>
+             <?php } else { ?>
 
-    <?php } ?>
+                 <form method="POST">
+                     <button type="submit" name="action" value="scavenge">Scavenge for Supplies</button>
+                     <button type="submit" name="action" value="rest">Rest in Bunker</button>
+                     <button type="submit" name="action" value="fortify">Fortify Base</button>
+                     <button type="submit" name="action" value="heal">🩹 Heal Wounds (Cost: 5)</button>
+                     <button type="submit" name="action" value="upgrade">🛠️ Upgrade Base (Cost: 10)</button>
 
-    <p>The forest is quiet. You must survive until the chopper arrives.</p>
-</body>
-</html>
+                     <?php if ($day >= 30) { ?>
+                         <button type="submit" name="action" value="rescue" style="background-color: green; color: white;">🚁 Signal Chopper (Cost: 20 Supplies)</button>
+                     <?php } ?>
+
+                     <br><br> 
+                     <input type="text" name="playerName" placeholder="Enter your name...">
+                     <button type="submit" name="action" value="save">💾 Save Game</button>
+                     <button type="submit" name="action" value="load">📂 Load Game</button>
+                     <button type="submit" name="action" value="restart">🔄 Restart Game</button>
+                 </form>
+
+             <?php } ?>
+
+             <br><br>
+             <a href="leaderboard.php" style="color: yellow;">🏆 View Leaderboard</a> | 
+             <a href="about.php" style="color: lightblue;">📖 About the Game</a>
+
+             <p>The forest is quiet. You must survive until the chopper arrives.</p>
+         </body>
+         </html>
